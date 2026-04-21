@@ -24,36 +24,11 @@ paths:
         status を指定しない場合は active のライバーのみ返す。
       tags: [livers]
       parameters:
-        - name: branch
-          in: query
-          schema:
-            $ref: '#/components/schemas/BranchEnum'
-          description: 国別で絞り込む
-        - name: generation
-          in: query
-          schema:
-            type: string
-          description: 'デビュー区分で絞り込む（例: "1期生", "SEEDs"）'
-        - name: status
-          in: query
-          schema:
-            $ref: '#/components/schemas/LiverStatusEnum'
-          description: 活動状態で絞り込む（指定なしの場合は active のみ）
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-          description: ページ番号（1始まり）
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
-          description: 1ページあたりの取得件数
+        - $ref: '#/components/parameters/BranchQueryParameter'
+        - $ref: '#/components/parameters/GenerationQueryParameter'
+        - $ref: '#/components/parameters/StatusQueryParameter'
+        - $ref: '#/components/parameters/PageQueryParameter'
+        - $ref: '#/components/parameters/LimitQueryParameter'
       responses:
         '200':
           description: OK
@@ -71,26 +46,9 @@ paths:
         /v1/livers/{liverId} より前に定義すること（FastAPI のルーティング順）。
       tags: [livers]
       parameters:
-        - name: q
-          in: query
-          required: true
-          schema:
-            type: string
-            minLength: 1
-          description: 検索キーワード
-        - name: page
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+        - $ref: '#/components/parameters/SearchQueryParameter'
+        - $ref: '#/components/parameters/PageQueryParameter'
+        - $ref: '#/components/parameters/LimitQueryParameter'
       responses:
         '200':
           description: OK
@@ -111,13 +69,7 @@ paths:
       summary: ライバー単体取得
       tags: [livers]
       parameters:
-        - name: liverId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ライバー ID（UUID v4）
+        - $ref: '#/components/parameters/LiverIdPathParameter'
       responses:
         '200':
           description: OK
@@ -141,13 +93,7 @@ paths:
         ライバーは存在するが色が未登録の場合は 200 + null を返す。
       tags: [livers]
       parameters:
-        - name: liverId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: ライバー ID（UUID v4）
+        - $ref: '#/components/parameters/LiverIdPathParameter'
       responses:
         '200':
           description: OK（色未登録の場合は null）
@@ -165,12 +111,127 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+  parameters:
+
+    BranchQueryParameter:
+      name: branch
+      in: query
+      schema:
+        $ref: '#/components/schemas/BranchEnum'
+      description: 国別で絞り込む
+
+    GenerationQueryParameter:
+      name: generation
+      in: query
+      schema:
+        $ref: '#/components/schemas/GenerationFilter'
+      description: 'デビュー区分で絞り込む（例: "1期生", "SEEDs"）'
+
+    StatusQueryParameter:
+      name: status
+      in: query
+      schema:
+        $ref: '#/components/schemas/LiverStatusEnum'
+      description: 活動状態で絞り込む（指定なしの場合は active のみ）
+
+    PageQueryParameter:
+      name: page
+      in: query
+      schema:
+        $ref: '#/components/schemas/PageNumber'
+      description: ページ番号（1始まり）
+
+    LimitQueryParameter:
+      name: limit
+      in: query
+      schema:
+        $ref: '#/components/schemas/PageSize'
+      description: 1ページあたりの取得件数
+
+    SearchQueryParameter:
+      name: q
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/SearchKeyword'
+      description: 検索キーワード
+
+    LiverIdPathParameter:
+      name: liverId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/LiverId'
+      description: ライバー ID（UUID v4）
+
   schemas:
+
+    ListLiversQueryParameters:
+      type: object
+      description: GET /v1/livers のクエリパラメータ
+      properties:
+        branch:
+          $ref: '#/components/schemas/BranchEnum'
+        generation:
+          $ref: '#/components/schemas/GenerationFilter'
+        status:
+          $ref: '#/components/schemas/LiverStatusEnum'
+        page:
+          $ref: '#/components/schemas/PageNumber'
+        limit:
+          $ref: '#/components/schemas/PageSize'
+
+    SearchLiversQueryParameters:
+      type: object
+      required: [q]
+      description: GET /v1/livers/search のクエリパラメータ
+      properties:
+        q:
+          $ref: '#/components/schemas/SearchKeyword'
+        page:
+          $ref: '#/components/schemas/PageNumber'
+        limit:
+          $ref: '#/components/schemas/PageSize'
+
+    LiverIdPathParameters:
+      type: object
+      required: [liverId]
+      description: /v1/livers/{liverId} 系エンドポイントのパスパラメータ
+      properties:
+        liverId:
+          $ref: '#/components/schemas/LiverId'
 
     BranchEnum:
       type: string
       enum: [JP, KR, ID, EN, IN]
       description: 国別のグループ
+
+    GenerationFilter:
+      type: string
+      description: 'デビュー区分で絞り込む（例: "1期生", "SEEDs"）'
+
+    PageNumber:
+      type: integer
+      minimum: 1
+      default: 1
+      description: ページ番号（1始まり）
+
+    PageSize:
+      type: integer
+      minimum: 1
+      maximum: 100
+      default: 20
+      description: 1ページあたりの取得件数
+
+    SearchKeyword:
+      type: string
+      minLength: 1
+      description: 検索キーワード
+
+    LiverId:
+      type: string
+      format: uuid
+      description: ライバー ID（UUID v4）
 
     LiverStatusEnum:
       type: string

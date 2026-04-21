@@ -53,3 +53,19 @@ pythonpath = ["src"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+# ================================================================
+# pytest 設定
+# ================================================================
+[tool.datamodel-codegen]
+input = "docs/openapi.yaml"
+input-file-type = "openapi"
+output = "src/generated/models/openapi_models.py"
+output-model-type = "pydantic_v2.BaseModel"
+target-python-version = "3.14"
+use-standard-collections = true
+use-union-operator = true
+field-constraints = true
+use-schema-description = true
+collapse-root-models = true
+formatters = ["ruff-format", "ruff-check"]
