@@ -1,0 +1,367 @@
+openapi: 3.1.0
+info:
+  title: Nijisanji Liver Color API
+  version: 0.1.0
+  description: |
+    にじさんじライバーごとのライバーカラーを取得・検索できる API。
+    MVP は読み取り専用（GET のみ）。認証なし。
+
+servers:
+  - url: http://localhost:8000
+    description: ローカル開発
+
+tags:
+  - name: livers
+    description: ライバー情報
+
+paths:
+  /v1/livers:
+    get:
+      operationId: list_livers
+      summary: ライバー一覧取得
+      description: |
+        ライバーの一覧を取得する。
+        status を指定しない場合は active のライバーのみ返す。
+      tags: [livers]
+      parameters:
+        - name: branch
+          in: query
+          schema:
+            $ref: '#/components/schemas/BranchEnum'
+          description: 所属ブランチで絞り込む
+        - name: generation
+          in: query
+          schema:
+            type: string
+          description: '期生で絞り込む（例: "1期生", "SEEDs"）'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/LiverStatusEnum'
+          description: 活動状態で絞り込む（指定なしの場合は active のみ）
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: ページ番号（1始まり）
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 1ページあたりの取得件数
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiverListResponse'
+
+  /v1/livers/search:
+    get:
+      operationId: search_livers
+      summary: ライバー名前検索
+      description: |
+        name / kana_name / english_name に対して部分一致で検索する。
+        /v1/livers/{liverId} より前に定義すること（FastAPI のルーティング順）。
+      tags: [livers]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: 検索キーワード
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiverListResponse'
+        '422':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/livers/{liverId}:
+    get:
+      operationId: get_liver
+      summary: ライバー単体取得
+      tags: [livers]
+      parameters:
+        - name: liverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ライバー ID（UUID v4）
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Liver'
+        '404':
+          description: ライバーが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/livers/{liverId}/color:
+    get:
+      operationId: get_liver_color
+      summary: ライバー現在色取得
+      description: |
+        ライバーが存在しない場合は 404 を返す。
+        ライバーは存在するが色が未登録の場合は 200 + null を返す。
+      tags: [livers]
+      parameters:
+        - name: liverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ライバー ID（UUID v4）
+      responses:
+        '200':
+          description: OK（色未登録の場合は null）
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/LiverColor'
+                  - type: 'null'
+        '404':
+          description: ライバーが存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+
+    BranchEnum:
+      type: string
+      enum: [JP, KR, ID, EN, IN]
+      description: 所属ブランチ
+
+    LiverStatusEnum:
+      type: string
+      enum: [active, inactive, retired]
+      description: 活動状態
+
+    AliasTypeEnum:
+      type: string
+      enum: [nickname, former_name, romanization, other]
+      description: 別名の種別
+
+    RgbColor:
+      type: object
+      required: [r, g, b]
+      description: RGB カラー値
+      properties:
+        r:
+          type: integer
+          minimum: 0
+          maximum: 255
+        g:
+          type: integer
+          minimum: 0
+          maximum: 255
+        b:
+          type: integer
+          minimum: 0
+          maximum: 255
+
+    LiverAlias:
+      type: object
+      required: [id, alias, alias_type]
+      description: ライバーの別名・ニックネーム
+      properties:
+        id:
+          type: string
+          format: uuid
+        alias:
+          type: string
+          description: '別名・ニックネーム（例: "社築", "くずは"）'
+        alias_type:
+          $ref: '#/components/schemas/AliasTypeEnum'
+        locale:
+          type: string
+          description: '言語コード（例: "ja", "en", "ko"）'
+
+    LiverColor:
+      type: object
+      required: [hex, rgb, is_official, source, updated_at]
+      description: ライバーの現在カラー情報
+      properties:
+        hex:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: 16進数カラーコード
+          example: '#AABBCC'
+        rgb:
+          $ref: '#/components/schemas/RgbColor'
+        display_name:
+          type: string
+          description: '色の表示名（例: "ライトブルー"）'
+        is_official:
+          type: boolean
+          description: 公式カラーかどうか
+        source:
+          type: string
+          description: '色の出典（自由文字列。例: "official_profile", "fanwiki"）'
+        source_url:
+          type: string
+          format: uri
+          description: '出典 URL'
+        note:
+          type: string
+          description: '補足メモ'
+        updated_at:
+          type: string
+          format: date-time
+
+    LiverSummary:
+      type: object
+      required: [id, name, status]
+      description: 一覧取得用の軽量ライバー情報（current_color 含む）
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: 'ライバー名（例: "葛葉"）'
+        kana_name:
+          type: string
+          description: 'よみがな（例: "くずは"）'
+        english_name:
+          type: string
+          description: '英字名（例: "Kuzuha"）'
+        branch:
+          $ref: '#/components/schemas/BranchEnum'
+        generation:
+          type: string
+          description: '期生（例: "1期生", "SEEDs"）'
+        status:
+          $ref: '#/components/schemas/LiverStatusEnum'
+        current_color:
+          oneOf:
+            - $ref: '#/components/schemas/LiverColor'
+            - type: 'null'
+          description: '現在のライバーカラー（未登録の場合は null）'
+
+    Liver:
+      type: object
+      required: [id, name, status, created_at, updated_at]
+      description: ライバー詳細情報
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kana_name:
+          type: string
+        english_name:
+          type: string
+        branch:
+          $ref: '#/components/schemas/BranchEnum'
+        generation:
+          type: string
+        status:
+          $ref: '#/components/schemas/LiverStatusEnum'
+        debuted_at:
+          type: string
+          format: date
+          description: デビュー日
+        retired_at:
+          type: string
+          format: date
+          description: 卒業日（活動中の場合は null）
+        aliases:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiverAlias'
+          description: 別名・ニックネーム一覧
+        current_color:
+          oneOf:
+            - $ref: '#/components/schemas/LiverColor'
+            - type: 'null'
+          description: 現在のライバーカラー（未登録の場合は null）
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LiverListResponse:
+      type: object
+      required: [items, page, limit, total]
+      description: ライバー一覧レスポンス
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiverSummary'
+        page:
+          type: integer
+          minimum: 1
+          description: 現在のページ番号
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: 1ページあたりの件数
+        total:
+          type: integer
+          minimum: 0
+          description: 総件数
+
+    ErrorDetail:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: 'エラーコード（例: NOT_FOUND, VALIDATION_ERROR）'
+        message:
+          type: string
+          description: エラーメッセージ
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      description: エラーレスポンス
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
