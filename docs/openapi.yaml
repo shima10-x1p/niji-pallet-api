@@ -28,12 +28,12 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/BranchEnum'
-          description: 所属ブランチで絞り込む
+          description: 国別で絞り込む
         - name: generation
           in: query
           schema:
             type: string
-          description: '期生で絞り込む（例: "1期生", "SEEDs"）'
+          description: 'デビュー区分で絞り込む（例: "1期生", "SEEDs"）'
         - name: status
           in: query
           schema:
@@ -170,7 +170,7 @@ components:
     BranchEnum:
       type: string
       enum: [JP, KR, ID, EN, IN]
-      description: 所属ブランチ
+      description: 国別のグループ
 
     LiverStatusEnum:
       type: string
@@ -259,18 +259,18 @@ components:
           format: uuid
         name:
           type: string
-          description: 'ライバー名（例: "葛葉"）'
+          description: 'ライバー名（例: "月ノ美兎"）'
         kana_name:
           type: string
-          description: 'よみがな（例: "くずは"）'
+          description: 'よみがな（例: "つきのみと"）'
         english_name:
           type: string
-          description: '英字名（例: "Kuzuha"）'
+          description: '英字名（例: "Mito Tsukino"）'
         branch:
           $ref: '#/components/schemas/BranchEnum'
         generation:
           type: string
-          description: '期生（例: "1期生", "SEEDs"）'
+          description: 'デビュー区分（例: "1期生", "SEEDs"）'
         status:
           $ref: '#/components/schemas/LiverStatusEnum'
         current_color:
