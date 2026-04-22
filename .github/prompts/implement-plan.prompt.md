@@ -36,7 +36,18 @@ agent: "agent"
 
 ---
 
-## Step 3: 単体テスト作成（Python Test Agent）
+## Step 3: コードレビュー（Code Review Agent）
+実装が完了したら、**`Code Review Agent` をサブエージェントとして呼び出して**コードレビューを行う。
+サブエージェントへ渡す情報:
+- 変更・作成したファイルの一覧（絶対パスまたはリポジトリ相対パス）
+- レビューで特に見てほしい観点（例: セキュリティ、アーキテクチャ規約、Python のイディオムなど）
+
+レビュー結果を受け取ったら、指摘内容をもとにコードの修正を行う。
+必要に応じて、**`Code Review Agent` をサブエージェントとして呼び出して**修正コードのレビューを依頼する。
+
+---
+
+## Step 4: 単体テスト作成（Python Test Agent）
 
 実装が完了したら、**`Python Test Agent` をサブエージェントとして呼び出して**単体テストを作成する。
 
@@ -52,7 +63,7 @@ agent: "agent"
 
 ---
 
-## Step 4: tests/unit/README.md 更新
+## Step 5: tests/unit/README.md 更新
 
 テスト作成完了後、`.github/skills/test-readme/SKILL.md` のルールに従って
 `tests/unit/README.md`（トップレベルおよび該当ディレクトリのサブ README）を更新する。
