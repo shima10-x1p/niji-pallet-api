@@ -5,4 +5,5 @@
 
 | ディレクトリ | テスト数 | 詳細 |
 |---|---|---|
-| core/shared | 10 | [README](core/shared/README.md) |
+| core/adapters/inbound | 11 | [README](core/adapters/inbound/README.md) |
+| core/shared | 11 | [README](core/shared/README.md) |

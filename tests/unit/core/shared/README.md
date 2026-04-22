@@ -5,8 +5,9 @@
 | クラス | テスト名 | 対象 | 観点 | 意図 |
 |---|---|---|---|---|
 | （なし） | test_get_logger_returns_same_singleton_instance | get_logger | 正常系 | `get_logger()` が同一の共有ロガーを返すこと |
-| （なし） | test_get_logger_uses_stdout_handler_and_expected_name | get_logger | 正常系 | ロガー名が `niji_pallet` で出力先が stdout であること |
-| （なし） | test_get_logger_outputs_message_with_expected_format | get_logger | 回帰 | ログ 1 行が日時・ミリ秒・ログレベル・メッセージを含む形式で出力されること |
+| （なし） | test_get_logger_uses_stdout_handler_and_request_id_filter | get_logger / RequestIdFilter | 正常系 | stdout 向けハンドラーに `RequestIdFilter` が付与されること |
+| （なし） | test_get_logger_outputs_message_with_expected_format_and_dash_request_id | get_logger | 回帰 | request_id 未設定時のログ 1 行が `[-]` を含む形式で出力されること |
+| （なし） | test_get_logger_outputs_current_request_id_from_context_var | get_logger / request_id_var | 正常系/回帰 | `ContextVar` に設定した request_id がログ出力へ自動付与されること |
 | （なし） | test_clear_logger_cache_reinitializes_logger_with_latest_settings | clear_logger_cache / get_logger | 正常系/回帰 | キャッシュクリア後に最新設定でハンドラーとログレベルが再設定されること |
 
 ## test_settings.py
