@@ -17,6 +17,7 @@ uv run pytest               # テスト実行
 uv run pytest tests/unit    # unit テストのみ
 uv run ruff check .         # lint
 uv run ruff format .        # format
+uvx --from datamodel-code-generator datamodel-codegen # OpenAPI スキーマから Pydantic モデルを生成
 ```
 
 依存管理は **uv** のみ使用。`pip install` は使わない。
