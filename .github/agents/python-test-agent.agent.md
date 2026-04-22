@@ -63,6 +63,8 @@ user-invocable: true
 - deterministic で再現性の高いテストを優先する
 - 既存プロジェクトで `pytest`、`unittest`、`doctest` などが使われている場合は、その流儀に合わせる
 - 失敗時に原因が分かりやすい assertion を書く
+- AAA パターンで Arrange / Act / Assert をコメントで分ける
+- すべてのテスト関数に docstring を付ける
 
 ## 出力形式
 - 変更したテストファイル
@@ -71,3 +73,61 @@ user-invocable: true
 - 実行したテストと結果
 - 実行できなかった場合の理由と代替確認方法
 - まだ残るリスクや、次に追加すると良いテスト
+
+## テストコードの例
+```python
+# sample 1: simple AAA with pytest-mock
+def test_build_greeting_returns_message_with_user_name(mocker: MockerFixture) -> None:
+    """
+		ユーザー名を使った挨拶文を返すことを確認する。
+		
+		正常系: 
+			観点: ユーザー名が取得できる場合、正しい挨拶文が返ること
+			期待値: "Hello, Taro!"
+
+		"""
+    # Arrange
+    repository = mocker.Mock(spec=UserRepository)
+    repository.get_name.return_value = "Taro"
+
+    # Act
+    actual = build_greeting(user_id=1, repository=repository)
+
+    # Assert
+    assert actual == "Hello, Taro!"
+    repository.get_name.assert_called_once_with(1)
+```
+
+```python
+# sample 2: parametrize AAA
+@pytest.mark.parametrize(
+    ("price", "rate", "expected"),
+    [
+        (1000, 0.0, 1000),
+        (1000, 0.1, 900),
+        (1000, 0.25, 750),
+    ],
+)
+def test_discount_price_returns_expected_value(
+    price: int,
+    rate: float,
+    expected: int,
+) -> None:
+    """
+		割引率ごとに期待した価格を返すことを確認する。
+		
+		正常系: 
+			観点: 割引率ごとに正しい価格が返ること
+			期待値: 指定した割引率に応じた価格
+
+		"""
+    # Arrange
+    input_price = price
+    input_rate = rate
+
+    # Act
+    actual = discount_price(price=input_price, rate=input_rate)
+
+    # Assert
+    assert actual == expected
+```
