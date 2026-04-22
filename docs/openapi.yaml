@@ -24,6 +24,7 @@ paths:
         status を指定しない場合は active のライバーのみ返す。
       tags: [livers]
       parameters:
+        - $ref: '#/components/parameters/XRequestIdHeaderParameter'
         - $ref: '#/components/parameters/BranchQueryParameter'
         - $ref: '#/components/parameters/GenerationQueryParameter'
         - $ref: '#/components/parameters/StatusQueryParameter'
@@ -46,6 +47,7 @@ paths:
         /v1/livers/{liverId} より前に定義すること（FastAPI のルーティング順）。
       tags: [livers]
       parameters:
+        - $ref: '#/components/parameters/XRequestIdHeaderParameter'
         - $ref: '#/components/parameters/SearchQueryParameter'
         - $ref: '#/components/parameters/PageQueryParameter'
         - $ref: '#/components/parameters/LimitQueryParameter'
@@ -69,6 +71,7 @@ paths:
       summary: ライバー単体取得
       tags: [livers]
       parameters:
+        - $ref: '#/components/parameters/XRequestIdHeaderParameter'
         - $ref: '#/components/parameters/LiverIdPathParameter'
       responses:
         '200':
@@ -93,6 +96,7 @@ paths:
         ライバーは存在するが色が未登録の場合は 200 + null を返す。
       tags: [livers]
       parameters:
+        - $ref: '#/components/parameters/XRequestIdHeaderParameter'
         - $ref: '#/components/parameters/LiverIdPathParameter'
       responses:
         '200':
@@ -112,6 +116,15 @@ paths:
 
 components:
   parameters:
+
+    XRequestIdHeaderParameter:
+      name: X-REQUEST-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: トレース用リクエスト ID（UUID v4）。省略した場合はサーバー側で生成する。
 
     BranchQueryParameter:
       name: branch
