@@ -1,0 +1,1 @@
+"""adapters 配下 integration テストのパッケージ。"""

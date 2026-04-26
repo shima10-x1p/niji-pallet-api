@@ -1,0 +1,1 @@
+"""core 配下 integration テストのパッケージ。"""
