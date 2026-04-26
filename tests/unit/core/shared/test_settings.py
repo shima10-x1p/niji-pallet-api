@@ -23,6 +23,7 @@ def reset_settings_state(
     clear_settings_cache()
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("LOG_LEVEL", raising=False)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
 
     yield
 
@@ -66,6 +67,64 @@ def test_app_settings_uses_env_value_when_log_level_is_set(
 
     # Assert
     assert settings.log_level == "DEBUG"
+
+
+def test_app_settings_uses_default_database_url_when_env_is_unset() -> None:
+    """
+    DATABASE_URL 未設定時に既定値が使われることを確認する。
+
+    正常系:
+        観点: データベース URL のデフォルト設定が適用されること
+        期待値: database_url が既定の SQLite URL であること
+    """
+
+    # Arrange
+
+    # Act
+    settings = AppSettings()
+
+    # Assert
+    assert settings.database_url == "sqlite+aiosqlite:///./niji_pallet.db"
+
+
+def test_app_settings_uses_env_value_when_database_url_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    DATABASE_URL が設定されている場合はその値が使われることを確認する。
+
+    正常系:
+        観点: 環境変数でデータベース URL を上書きできること
+        期待値: database_url が設定値へ正規化されること
+    """
+
+    # Arrange
+    monkeypatch.setenv("DATABASE_URL", " sqlite+aiosqlite:///:memory: ")
+
+    # Act
+    settings = AppSettings()
+
+    # Assert
+    assert settings.database_url == "sqlite+aiosqlite:///:memory:"
+
+
+def test_app_settings_raises_validation_error_for_empty_database_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    空文字相当の DATABASE_URL では例外になることを確認する。
+
+    異常系:
+        観点: 空白のみのデータベース URL を拒否すること
+        期待値: ValidationError が送出されること
+    """
+
+    # Arrange
+    monkeypatch.setenv("DATABASE_URL", "   ")
+
+    # Act / Assert
+    with pytest.raises(ValidationError, match="DATABASE_URL"):
+        AppSettings()
 
 
 def test_app_settings_normalizes_log_level_with_whitespace_and_case(

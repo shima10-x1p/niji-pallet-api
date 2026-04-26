@@ -5,5 +5,9 @@
 
 | ディレクトリ | テスト数 | 詳細 |
 |---|---|---|
+| core | 1 | [README](core/README.md) |
 | core/adapters/inbound | 11 | [README](core/adapters/inbound/README.md) |
-| core/shared | 11 | [README](core/shared/README.md) |
+| core/adapters/outbound/sqlalchemy | 16 | [README](core/adapters/outbound/sqlalchemy/README.md) |
+| core/application/ports/outbound | 2 | [README](core/application/ports/outbound/README.md) |
+| core/domain/entities | 3 | [README](core/domain/entities/README.md) |
+| core/shared | 14 | [README](core/shared/README.md) |

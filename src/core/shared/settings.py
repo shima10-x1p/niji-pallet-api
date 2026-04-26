@@ -33,6 +33,11 @@ class AppSettings(BaseSettings):
         min_length=1,
         validation_alias="LOG_LEVEL",
     )
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./niji_pallet.db",
+        min_length=1,
+        validation_alias="DATABASE_URL",
+    )
 
     @field_validator("log_level")
     @classmethod
@@ -42,6 +47,17 @@ class AppSettings(BaseSettings):
         normalized = value.strip().upper()
         if normalized not in _ALLOWED_LOG_LEVELS:
             msg = "LOG_LEVEL には有効なログレベルを指定してください。"
+            raise ValueError(msg)
+        return normalized
+
+    @field_validator("database_url")
+    @classmethod
+    def validate_database_url(cls, value: str) -> str:
+        """DATABASE_URL の前後空白を除去し、空文字を拒否する。"""
+
+        normalized = value.strip()
+        if not normalized:
+            msg = "DATABASE_URL には空文字以外を指定してください。"
             raise ValueError(msg)
         return normalized
 

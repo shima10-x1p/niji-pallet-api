@@ -16,6 +16,9 @@
 |---|---|---|---|---|
 | （なし） | test_app_settings_uses_info_when_log_level_is_unset | AppSettings | 正常系 | `LOG_LEVEL` 未設定時に `INFO` が使われること |
 | （なし） | test_app_settings_uses_env_value_when_log_level_is_set | AppSettings | 正常系 | 環境変数で `LOG_LEVEL` を上書きできること |
+| （なし） | test_app_settings_uses_default_database_url_when_env_is_unset | AppSettings | 正常系 | `DATABASE_URL` 未設定時に既定の SQLite URL が使われること |
+| （なし） | test_app_settings_uses_env_value_when_database_url_is_set | AppSettings | 正常系 | 環境変数で `DATABASE_URL` を上書きできること |
+| （なし） | test_app_settings_raises_validation_error_for_empty_database_url | AppSettings | 異常系 | 空白のみの `DATABASE_URL` で `ValidationError` が送出されること |
 | （なし） | test_app_settings_normalizes_log_level_with_whitespace_and_case | AppSettings | 境界値 | 前後空白付きかつ小文字の `LOG_LEVEL` が `DEBUG` に正規化されること |
 | （なし） | test_app_settings_raises_validation_error_for_invalid_log_level | AppSettings | 異常系 | 不正な `LOG_LEVEL` で `ValidationError` が送出されること |
 | （なし） | test_get_settings_returns_cached_instance | get_settings | 正常系 | `get_settings()` がキャッシュ済みインスタンスを返すこと |
