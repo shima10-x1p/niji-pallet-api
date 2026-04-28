@@ -1,3 +1,17 @@
+# GitHub Copilot instructions
+
+This repository keeps shared AI guidance under `docs/ai/`.
+
+Follow:
+- `docs/ai/project-instructions.md`
+- `docs/ai/coding-instructions.md`
+- `docs/ai/testing-instructions.md`
+
+For review tasks, also follow:
+- `docs/ai/review-instructions.md`
+
+---
+
 # Copilot Instructions — niji-pallet-api
 
 ## このリポジトリの目的
